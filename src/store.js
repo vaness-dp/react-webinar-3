@@ -5,6 +5,15 @@ class Store {
   constructor(initState = {}) {
     this.state = initState;
     this.listeners = []; // Слушатели изменений состояния
+    this.codeCounter = this.getMaxCode() + 1; // Уникальный счетчик для кодов
+  }
+
+  /**
+   * Получаем максимальный код из существующих записей
+   * для правильного старта счетчика уникальных кодов
+   */
+  getMaxCode() {
+    return this.state.list.length ? Math.max(...this.state.list.map(item => item.code)) : 0;
   }
 
   /**
@@ -39,12 +48,24 @@ class Store {
   }
 
   /**
+   * Генерация уникального кода
+   * @returns {number}
+   */
+  generateUniqueCode() {
+    return this.codeCounter++;
+  }
+
+  /**
    * Добавление новой записи
    */
   addItem() {
+    const newCode = this.generateUniqueCode();
     this.setState({
       ...this.state,
-      list: [...this.state.list, { code: this.state.list.length + 1, title: 'Новая запись' }],
+      list: [
+        ...this.state.list,
+        { code: newCode, title: `Новая запись ${newCode}`, selectedCount: 0, selected: false },
+      ],
     });
   }
 
@@ -67,10 +88,15 @@ class Store {
     this.setState({
       ...this.state,
       list: this.state.list.map(item => {
+        // Если элемент выбран — снимаем выделение, иначе выделяем его
         if (item.code === code) {
-          item.selected = !item.selected;
+          return {
+            ...item,
+            selected: !item.selected,
+            selectedCount: !item.selected ? (item.selectedCount || 0) + 1 : item.selectedCount,
+          };
         }
-        return item;
+        return { ...item, selected: false };
       }),
     });
   }
