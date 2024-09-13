@@ -10,6 +10,16 @@ import './styles.css';
 function App({ store }) {
   const list = store.getState().list;
 
+  function pluralize(count, one, few, many) {
+    if (count % 10 === 1 && count % 100 !== 11) {
+      return one;
+    } else if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)) {
+      return few;
+    } else {
+      return many;
+    }
+  }
+
   return (
     <div className="App">
       <div className="App-head">
@@ -27,9 +37,10 @@ function App({ store }) {
                 onClick={() => store.selectItem(item.code)}
               >
                 <div className="Item-code">{item.code}</div>
-                <div className="Item-title">{item.title}</div>
-                <div className="Item-selected-count">
-                  {item.selectedCount > 0 && `Выделяли ${item.selectedCount} раз`}
+                <div className="Item-title">
+                  {item.title}{' '}
+                  {item.selectedCount > 0 &&
+                    `| Выделяли ${item.selectedCount} ${pluralize(item.selectedCount, 'раз', 'раза', 'раз')}`}
                 </div>
                 <div className="Item-actions">
                   <button onClick={() => store.deleteItem(item.code)}>Удалить</button>
